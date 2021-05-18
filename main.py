@@ -28,9 +28,6 @@ print("Bot has been started.")
 @bot.message_handler(content_types = ['text'])
 def reply(message):
 	text = message.text
-	# result_ins = model_ins.predict([text])[0]
-	# result_thr = model_thr.predict([text])[0]
-	# result_obs = model_obs.predict([text])[0]
 
 	result_ins = round(model_ins.predict_proba([text]).T[1][0], 4)
 	result_thr = round(model_thr.predict_proba([text]).T[1][0], 4)
@@ -41,10 +38,8 @@ def reply(message):
 	print('------')
 
 	if (result_ins < 0.5 and result_thr < 0.5 and result_obs < 0.5): return
-	
-	ans = f"Это оскорбление с вероятностью {result_ins}\nЭто угроза с вероятностью {result_thr}\nЭто домогательство с вероятностью {result_obs}\n"
 
-	bot.reply_to(message, ans)
+	bot.reply_to(message, f"Это оскорбление с вероятностью {result_ins}\nЭто угроза с вероятностью {result_thr}\nЭто домогательство с вероятностью {result_obs}\n")
 	
 
 bot.polling()
