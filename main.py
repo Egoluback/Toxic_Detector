@@ -15,7 +15,7 @@ def tokenize_sentence(sentence: str, remove_stop_words: bool = True):
     tokens = [snowball.stem(i) for i in tokens]
     return tokens
 
-TOKEN = '1881824091:AAH6B7eYZnkB2WfupGUlt9ZUyre1-ixnQn0'
+TOKEN = ''
 
 model_ins = joblib.load("data/model_ins_logistic_2.joblib")
 model_thr = joblib.load("data/model_thr_logistic_2.joblib")
