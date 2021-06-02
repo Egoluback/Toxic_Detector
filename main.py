@@ -4,15 +4,12 @@ from nltk.stem import SnowballStemmer
 
 from Vectorizer import Vectorizer
 
-import telebot, joblib, string
-
-import wget, zipfile, gensim
+import telebot, joblib, string, wget, zipfile, gensim
 
 import numpy as np
 
 from functools import lru_cache
 from pymystem3 import Mystem
-
 
 # snowball = SnowballStemmer(language="russian")
 # russian_stop_words = stopwords.words("russian")
@@ -56,10 +53,8 @@ def reply(message):
 	print('------')
 
 	if (result_ins < 0.5 and result_thr < 0.5 and result_obs < 0.5): return
-	# if (result_ins < 0.5): return
 
 	bot.reply_to(message, f"Это оскорбление с вероятностью {result_ins}\nЭто угроза с вероятностью {result_thr}\nЭто домогательство с вероятностью {result_obs}\n")
-	# bot.reply_to(message, f"Это оскорбление с вероятностью {result_ins}")
 	
 
 bot.polling()
