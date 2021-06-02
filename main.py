@@ -2,10 +2,22 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import SnowballStemmer
 
+from Vectorizer import Vectorizer
+
 import telebot, joblib, string
 
-snowball = SnowballStemmer(language="russian")
-russian_stop_words = stopwords.words("russian")
+import wget, zipfile, gensim
+
+import numpy as np
+
+from functools import lru_cache
+from pymystem3 import Mystem
+
+
+# snowball = SnowballStemmer(language="russian")
+# russian_stop_words = stopwords.words("russian")
+
+vectorizer = Vectorizer(model_file = "204.zip")
 
 def tokenize_sentence(sentence: str, remove_stop_words: bool = True):
     tokens = word_tokenize(sentence, language="russian")
@@ -17,11 +29,15 @@ def tokenize_sentence(sentence: str, remove_stop_words: bool = True):
 
 TOKEN = ''
 
-model_ins = joblib.load("data/model_ins_logistic_2.joblib")
-model_thr = joblib.load("data/model_thr_logistic_2.joblib")
-model_obs = joblib.load("data/model_obs_logistic_2.joblib")
+# model_ins = joblib.load("data/models/model_ins_logistic_2.joblib")
+# model_thr = joblib.load("data/models/model_thr_logistic_2.joblib")
+# model_obs = joblib.load("data/models/model_obs_logistic_2.joblib")
 
-bot = telebot.TeleBot(TOKEN)
+model_ins = joblib.load("data/models/model_ins_w2v_CBC.joblib")
+model_thr = joblib.load("data/models/model_thr_w2v_CBC.joblib")
+model_obs = joblib.load("data/models/model_obs_w2v_CBC.joblib")
+
+лbot = telebot.TeleBot(TOKEN)
 
 print("Bot has been started.")
 
@@ -29,17 +45,21 @@ print("Bot has been started.")
 def reply(message):
 	text = message.text
 
-	result_ins = round(model_ins.predict_proba([text]).T[1][0], 4)
-	result_thr = round(model_thr.predict_proba([text]).T[1][0], 4)
-	result_obs = round(model_obs.predict_proba([text]).T[1][0], 4)
+	text_vec = vectorizer.Vectorize_one(text)
+
+	result_ins = round(model_ins.predict_proba([text_vec]).T[1][0], 4)
+	result_thr = round(model_thr.predict_proba([text_vec]).T[1][0], 4)
+	result_obs = round(model_obs.predict_proba([text_vec]).T[1][0], 4)
 	
 	print("Text: {}".format(text))
-	print("INSULT: {}; THREAT: {}; OBSCENITY: {}".format(result_ins, result_thr, result_obs))
+	print(f"INSULT: {result_ins}; THREAT: {result_thr}; OBSCENITY: {result_obs}")
 	print('------')
 
 	if (result_ins < 0.5 and result_thr < 0.5 and result_obs < 0.5): return
+	# if (result_ins < 0.5): return
 
 	bot.reply_to(message, f"Это оскорбление с вероятностью {result_ins}\nЭто угроза с вероятностью {result_thr}\nЭто домогательство с вероятностью {result_obs}\n")
+	# bot.reply_to(message, f"Это оскорбление с вероятностью {result_ins}")
 	
 
 bot.polling()
